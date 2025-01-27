@@ -14,11 +14,13 @@ products = pd.read_csv("Products.csv")
 transactions = pd.read_csv("Transactions.csv")
 
 # Inspect datasets
-print("Customers Data:")
+print("\n--- Customers Data ---")
 print(customers.head())
-print("\nProducts Data:")
+
+print("\n--- Products Data ---")
 print(products.head())
-print("\nTransactions Data:")
+
+print("\n--- Transactions Data ---")
 print(transactions.head())
 
 # Task 1: Exploratory Data Analysis (EDA)
@@ -30,13 +32,14 @@ print(products.info())
 print("\nTransactions Summary:")
 print(transactions.info())
 
-# Missing values check
+# Missing values
 print("\nMissing Values:")
-print("Customers:", customers.isnull().sum())
-print("Products:", products.isnull().sum())
-print("Transactions:", transactions.isnull().sum())
+print("Customers:\n", customers.isnull().sum())
+print("Products:\n", products.isnull().sum())
+print("Transactions:\n", transactions.isnull().sum())
 
 # Visualizations
+print("\n--- Visualizing Customers by Region ---")
 sns.countplot(data=customers, x='Region')
 plt.title("Number of Customers by Region")
 plt.show()
@@ -51,18 +54,9 @@ sales_by_region = transactions.merge(customers, on="CustomerID").groupby('Region
 print("\nTotal Sales by Region:")
 print(sales_by_region)
 
-# Save EDA insights to a PDF
-with open("YourName_EDA.pdf", "w") as f:
-    f.write("Business Insights:\n")
-    f.write("1. Region-wise customer distribution shows XYZ trends.\n")
-    f.write("2. The top 5 products contribute significantly to total sales.\n")
-    f.write("3. Sales are highest in the ABC region, indicating...\n")
-    f.write("4. Transaction volume varies based on product category.\n")
-    f.write("5. Signup trends indicate XYZ.\n")
-
 # Task 2: Lookalike Model
 print("\n--- Building Lookalike Model ---")
-# Merge datasets for a unified view
+# Merge datasets
 merged_data = transactions.merge(customers, on="CustomerID").merge(products, on="ProductID")
 
 # Create customer-product interaction matrix
@@ -73,18 +67,11 @@ similarity_matrix = cosine_similarity(customer_product_matrix)
 similarity_df = pd.DataFrame(similarity_matrix, index=customer_product_matrix.index, columns=customer_product_matrix.index)
 
 # Find top 3 similar customers for first 20 customers
-lookalike_results = {}
+print("\nTop 3 Similar Customers for Each Customer (First 20):")
 for customer_id in customer_product_matrix.index[:20]:
     similar_customers = similarity_df[customer_id].sort_values(ascending=False).iloc[1:4]
-    lookalike_results[customer_id] = similar_customers
-
-# Save lookalike results to a CSV
-lookalike_df = pd.DataFrame([
-    {"CustomerID": k, "SimilarCustomerID": sim_id, "Score": score}
-    for k, v in lookalike_results.items() for sim_id, score in v.items()
-])
-lookalike_df.to_csv("YourName_Lookalike.csv", index=False)
-print("Lookalike Model results saved to 'YourName_Lookalike.csv'.")
+    print(f"Customer {customer_id}:")
+    print(similar_customers)
 
 # Task 3: Customer Segmentation / Clustering
 print("\n--- Customer Segmentation ---")
@@ -104,11 +91,11 @@ clustering_data['Cluster'] = kmeans.fit_predict(scaled_data)
 
 # Evaluate clustering
 db_index = davies_bouldin_score(scaled_data, clustering_data['Cluster'])
-print(f"Davies-Bouldin Index: {db_index}")
+print(f"\nDavies-Bouldin Index: {db_index}")
 
-# Save clustering results
-clustering_data.to_csv("YourName_Clustering.csv", index=False)
-print("Clustering results saved to 'YourName_Clustering.csv'.")
+# Display clustering results
+print("\nClustering Results (First 10 Customers):")
+print(clustering_data.head(10))
 
 # Visualize clusters
 plt.scatter(scaled_data[:, 0], scaled_data[:, 1], c=clustering_data['Cluster'], cmap='viridis')
